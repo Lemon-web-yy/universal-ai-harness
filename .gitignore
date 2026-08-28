@@ -1,0 +1,3 @@
+# Python 工具缓存
+__pycache__/
+*.pyc
