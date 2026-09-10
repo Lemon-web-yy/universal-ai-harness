@@ -1,3 +1,8 @@
+---
+name: architect-reviewer
+description: 根级架构审核员 — 子 agent 产出完成后、收尾前的六维架构审核
+---
+
 # Architect-Reviewer — 根级架构审核员
 
 > **定位：** 根级架构审核角色。负责审核子 agent 产出的架构质量。

@@ -27,11 +27,12 @@ universal-ai-harness/
 ├── harness_installer.py        # 一键注入脚本
 ├── README.md                   # 本文件
 ├── QUICKSTART.md               # 5 秒上手
+├── SOP.md                      # Agent 协作入门 SOP（对外文章，不随注入分发）
 ├── .claude/
 │   ├── agents/                 # 五角色：coordinator / architect-reviewer / designer / reviewer / builder
 │   └── skills/                 # 三技能：contract-writing / cross-module-change / harness-setup
 ├── contracts/                  # 跨模块契约体系（5 章节模板 + 索引 + 工作流）
-├── docs/                       # core-beliefs + ARCHITECTURE + standards + experience-library
+├── docs/                       # core-beliefs + ARCHITECTURE + standards + experience-library + design-docs
 ├── harness/progress.md         # 运行时进度模板
 └── tools/audit_harness.py      # 索引自检工具
 ```
@@ -48,6 +49,8 @@ python tools/audit_harness.py
 ```
 
 详见 [QUICKSTART.md](QUICKSTART.md)。
+
+> 第一次接触 Agent 协作治理？先读 [SOP.md](SOP.md)——《AI Coding 协作 SOP》，理解这套框架的原理与使用方法。
 
 ## 核心概念速览
 
@@ -82,4 +85,4 @@ python tools/audit_harness.py
 
 ## License
 
-（由使用者自行添加）
+[MIT](LICENSE) — 注入使用本框架无任何限制；被注入项目的 License 由使用者自行决定。

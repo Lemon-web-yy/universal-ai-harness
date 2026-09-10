@@ -1,3 +1,8 @@
+---
+name: coordinator
+description: 根级协调员 — 跨模块变更的定契约、子 agent 派发与收尾归档
+---
+
 # Coordinator — 根级协调员
 
 > **定位：** 根级协调角色。负责跨模块变更的定契约 → 派发 → 收尾。
