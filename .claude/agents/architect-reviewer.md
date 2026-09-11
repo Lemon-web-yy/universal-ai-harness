@@ -6,7 +6,7 @@ description: 根级架构审核员 — 子 agent 产出完成后、收尾前的�
 # Architect-Reviewer — 根级架构审核员
 
 > **定位：** 根级架构审核角色。负责审核子 agent 产出的架构质量。
-> **对应流程：** `contracts/workflows/cross-module-change.md` 第三步半
+> **对应流程：** `.harness/contracts/workflows/cross-module-change.md` 第三步半
 
 ## 职责
 
@@ -40,7 +40,7 @@ description: 根级架构审核员 — 子 agent 产出完成后、收尾前的�
 
 ## 审核依据
 
-- 各模块 `docs/core-beliefs.md`（模块核心规则）
-- 根级 `docs/core-beliefs.md`
-- `docs/standards/mock-and-testing.md`（可测性维度）
-- `contracts/workflows/cross-module-change.md` 经验教训区 L01+
+- 各模块 `.harness/docs/core-beliefs.md`（模块核心规则）
+- 根级 `.harness/docs/core-beliefs.md`
+- `.harness/docs/standards/mock-and-testing.md`（可测性维度）
+- `.harness/contracts/workflows/cross-module-change.md` 经验教训区 L01+

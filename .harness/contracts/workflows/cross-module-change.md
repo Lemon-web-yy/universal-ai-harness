@@ -8,7 +8,7 @@
 | 评级 | 联系方式 | 流程 | 举例 |
 |------|---------|------|------|
 | **L0 纯独立** | 各模块自己干 | 不走跨模块流程，按模块 CLAUDE.md | 模块内部重构 |
-| **L1 契约同步** | 发布契约到 `contracts/`，按需订阅 | 只定契约不派发 | A 模块发布新接口，B 模块按需读取 |
+| **L1 契约同步** | 发布契约到 `.harness/contracts/`，按需订阅 | 只定契约不派发 | A 模块发布新接口，B 模块按需读取 |
 | **L2 协调开发** | Coordinator 轻度协调，并行实现 | 定契约+并行派发+架构审核+收尾 | 跨 2-3 模块的功能集成 |
 | **L3 统一编排** | Coordinator 全程主导 | 完整流程 | 跨全部模块的大型变更 |
 
@@ -19,7 +19,7 @@
 ## L1 — 契约同步（3 步）
 
 ```
-1. Coordinator 写 contracts/NNN_*.md（5 章节契约档案）
+1. Coordinator 写 .harness/contracts/NNN_*.md（5 章节契约档案）
 2. 用户审核契约（spec review gate）
 3. 各模块按需 Read 契约 → 自己实现（各自走 L0 流程）
 ```
@@ -30,7 +30,7 @@
 
 ### 第一步：根 agent 定契约（此时不写代码）
 
-派发 Coordinator agent，写 `contracts/NNN_*.md`（用 `_template.md` 的 5 章节格式）。完成后**停下来给用户审**——契约是架构决策，用户不点头不往下走。
+派发 Coordinator agent，写 `.harness/contracts/NNN_*.md`（用 `_template.md` 的 5 章节格式）。完成后**停下来给用户审**——契约是架构决策，用户不点头不往下走。
 
 ### 第二步：并行派发（prompt 只给路径不给全文）
 
@@ -47,7 +47,7 @@
 
 ### 第三步：子 agent 自治实现
 
-各 Builder 在各自模块内：写模块 ADR → 按 Scope 实现 → 编译验证（无法编译的标 `[未验证]`）→ 更新模块 harness/progress.md。
+各 Builder 在各自模块内：写模块 ADR → 按 Scope 实现 → 编译验证（无法编译的标 `[未验证]`）→ 更新模块 .harness/progress.md。
 
 ### 第三步半：架构审核（进入收尾前）
 
@@ -56,8 +56,8 @@
 ### 第四步：收尾归档
 
 1. 三层验证逐项核对：编译验证（各端独立编译）→ 集成验证（数据流穿通两端）→ 真实环境实测（用户部署真机）
-2. 更新 `contracts/index.md` + 各模块 `harness/progress.md`
-3. 运行 `python tools/audit_harness.py` 核对索引与实体一致（教训 L22）
+2. 更新 `.harness/contracts/index.md` + 各模块 `.harness/progress.md`
+3. 运行 `python .harness/audit_harness.py` 核对索引与实体一致（教训 L22）
 4. 边界外问题独立记录到 Known Issues，不阻塞本需求收尾
 
 ## L3 — 统一编排（全模块复杂变更）

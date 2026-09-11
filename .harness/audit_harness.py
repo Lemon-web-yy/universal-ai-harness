@@ -7,9 +7,9 @@ Harness 索引自检脚本
 接入点：跨模块工作流收尾必跑；单模块收尾建议跑。
 
 用法：
-    python tools/audit_harness.py               # 审计当前目录
-    python tools/audit_harness.py --root PATH   # 审计指定项目根
-    python tools/audit_harness.py --strict      # P1 也视为失败（CI 用）
+    python .harness/audit_harness.py               # 审计当前目录
+    python .harness/audit_harness.py --root PATH   # 审计指定项目根
+    python .harness/audit_harness.py --strict      # P1 也视为失败（CI 用）
 
 退出码：0 = 全过；1 = 存在 P0；2 = 仅存在 P1/P2（非 strict 时）
 """
@@ -19,15 +19,17 @@ import sys
 from pathlib import Path
 
 PLACEHOLDER = "{{PROJECT_NAME}}"
+INTAKE_PLACEHOLDER = "{{INTAKE_PENDING}}"
 
 
 def find_board_dirs(root: Path):
-    """模块目录 = 同时含 docs/design-docs/ 与 .claude/agents/builder.md 的目录（根级不含这两者）。"""
+    """模块目录 = 同时含 .harness/docs/design-docs/ 与 .claude/agents/builder.md 的目录。
+    根级注入后两者兼备，作为根治理单元同样计入（计数含根：1 = 根，2 = 根 + 一个子模块）。"""
     boards = []
     for builder in root.rglob(".claude/agents/builder.md"):
         # builder.md → agents/ → .claude/ → 模块根目录（三级 parent）
         d = builder.parent.parent.parent
-        if (d / "docs" / "design-docs").is_dir():
+        if (d / ".harness" / "docs" / "design-docs").is_dir():
             boards.append(d)
     return sorted(set(boards))
 
@@ -35,12 +37,12 @@ def find_board_dirs(root: Path):
 def check_contracts(root: Path):
     """契约索引 vs 实体；编号冲突。"""
     problems = []
-    idx = root / "contracts" / "index.md"
+    idx = root / ".harness" / "contracts" / "index.md"
     if not idx.exists():
-        return problems  # 单模块裁剪后无 contracts/，跳过
+        return problems  # 单模块裁剪后无 .harness/contracts/，跳过
     # 实体文件
     entities = {}
-    for p in (root / "contracts").glob("*.md"):
+    for p in (root / ".harness" / "contracts").glob("*.md"):
         m = re.match(r"(\d{3})_", p.name)
         if m:
             n = int(m.group(1))
@@ -60,19 +62,19 @@ def check_contracts(root: Path):
     # 实体有但索引无
     for n in entities:
         if n not in index_nums:
-            problems.append(("P0", f"契约 {n:03d} 存在实体但 contracts/index.md 未登记"))
+            problems.append(("P0", f"契约 {n:03d} 存在实体但 .harness/contracts/index.md 未登记"))
     # 索引有但实体无（允许 index 刚起空表，无数字时跳过）
     if index_nums:
         for n in index_nums:
             if n not in entities:
-                problems.append(("P0", f"contracts/index.md 登记 {n:03d} 但实体文件缺失"))
+                problems.append(("P0", f".harness/contracts/index.md 登记 {n:03d} 但实体文件缺失"))
     return problems
 
 
 def check_design_docs(board: Path):
     """模块 ADR 索引 vs 实体；编号连续性。"""
     problems = []
-    dd = board / "docs" / "design-docs"
+    dd = board / ".harness" / "docs" / "design-docs"
     entities = {}
     for p in dd.glob("*.md"):
         if p.name.startswith("_"):
@@ -84,7 +86,7 @@ def check_design_docs(board: Path):
         return problems  # 空模块，正常
     idx = dd / "index.md"
     if not idx.exists():
-        problems.append(("P1", f"{board.name}/docs/design-docs/index.md 缺失"))
+        problems.append(("P1", f"{board.name}/.harness/docs/design-docs/index.md 缺失"))
     # 编号跳号
     nums = sorted(entities)
     for expect, actual in zip(range(1, len(nums) + 1), nums):
@@ -131,14 +133,19 @@ def check_agents(board: Path):
 def check_placeholder(root: Path):
     problems = []
     # 工具脚本自身定义 PLACEHOLDER 常量，属功能必需，不视为残留
-    tool_scripts = {"harness_installer.py", "audit_harness.py", "extract_kit.py", "init_project.py"}
+    tool_scripts = {"harness_installer.py", "audit_harness.py"}
     for p in root.rglob("*"):
-        if not p.is_file() or p.suffix not in (".md", ".py", ".pro", ".c", ".h", ".cpp", ".yml", ".yaml", ".rs", ".js", ".ts", ".go", ".java"):
+        # 占位符检查的文本后缀清单（须与 harness_installer.py 的 TEXT_SUFFIXES 保持同步）
+        if not p.is_file() or p.suffix not in (".md", ".py", ".pro", ".c", ".h", ".cpp", ".hpp", ".yml", ".yaml", ".rs", ".js", ".ts", ".go", ".java"):
             continue
         if p.name in tool_scripts:
             continue
         try:
-            if PLACEHOLDER in p.read_text(encoding="utf-8"):
+            text = p.read_text(encoding="utf-8")
+            # 横幅仅存在于 CLAUDE.md（skill/文档中"提及"横幅字样不算残留）
+            if p.name == "CLAUDE.md" and INTAKE_PLACEHOLDER in text:
+                problems.append(("P1", f"{p.relative_to(root)} 残留初始化横幅 {INTAKE_PLACEHOLDER}（项目画像未采集：执行 /project-intake）"))
+            if PLACEHOLDER in text:
                 problems.append(("P2", f"{p.relative_to(root)} 残留占位符 {PLACEHOLDER}"))
         except (UnicodeDecodeError, OSError):
             pass
@@ -158,9 +165,9 @@ def main():
     for b in boards:
         all_problems += check_design_docs(b)
         all_problems += check_agents(b)
-        all_problems += check_progress(b / "harness" / "progress.md")
+        all_problems += check_progress(b / ".harness" / "progress.md")
     all_problems += check_claude_md(root / "CLAUDE.md")
-    all_problems += check_progress(root / "harness" / "progress.md")
+    all_problems += check_progress(root / ".harness" / "progress.md")
     all_problems += check_placeholder(root)
 
     # 输出

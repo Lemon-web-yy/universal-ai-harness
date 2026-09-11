@@ -4,7 +4,7 @@
 *状态：Proposed*
 
 > **定位：** 模块内部架构决策档案（精简 ADR）。触发：架构调整 / 接口变更。流程：先写本档案再动代码。
-> 跨模块变更不走本模板——使用 `contracts/_template.md`（契约 5 章节）。
+> 跨模块变更不走本模板——使用 `.harness/contracts/_template.md`（契约 5 章节）。
 
 ## Context
 

@@ -8,11 +8,11 @@ description: 对一条需求执行完整开发闭环 —— 设计 → 审核 �
 
 ## 0. L0-L3 评级
 
-判定需求联系强度：单模块内部 → L0；涉及 2+ 模块 → L1/L2/L3（详见 `docs/core-beliefs.md`）。能 L0 不 L1。
+判定需求联系强度：单模块内部 → L0；涉及 2+ 模块 → L1/L2/L3（详见 `.harness/docs/core-beliefs.md`）。能 L0 不 L1。
 
 ## 单模块（L0）
 
-1. **Designer** 设计架构，写 `docs/design-docs/NNN_*.md` 草稿
+1. **Designer** 设计架构，写 `.harness/docs/design-docs/NNN_*.md` 草稿
 2. **Reviewer** 审核（需求 + 架构 + 格式）
 3. 用户确认设计
 4. **Builder** 按 Scope 实现 + 本地编译/单测自检
@@ -25,4 +25,4 @@ description: 对一条需求执行完整开发闭环 —— 设计 → 审核 �
 
 ## 收尾
 
-`python tools/audit_harness.py` 索引自检，确认契约索引与实体一致、无编号漂移。
+`python .harness/audit_harness.py` 索引自检，确认契约索引与实体一致、无编号漂移。

@@ -194,7 +194,7 @@ AA 55 03 NN .. .. .. CHECK
 
 | 子 agent | 工作目录 | 任务档案 |
 |---------|---------|---------|
-| X-Builder | `<Module>/` | `<Module>/docs/design-docs/NNN_*.md` |
+| X-Builder | `<Module>/` | `<Module>/.harness/docs/design-docs/NNN_*.md` |
 
 ## 关联文档
 

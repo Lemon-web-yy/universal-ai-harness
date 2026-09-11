@@ -219,15 +219,15 @@ python harness_installer.py --target /path/to/your_project --profile multi
 
 # 进入项目执行自检，应显示 [OK]
 cd /path/to/your_project
-python tools/audit_harness.py
+python .harness/audit_harness.py
 ```
 
-注入内容：`.claude/`（角色 + 技能 + 命令）、`contracts/`（契约体系）、`docs/`（核心规则 + 架构模板 + 规范）、`harness/progress.md`（进度账本）、`tools/audit_harness.py`（自检脚本），以及按 profile 生成的根级 CLAUDE.md。
+注入内容：`.claude/`（角色 + 技能 + 命令）与 `.harness/` 治理单一命名空间（`contracts/` 契约体系、`docs/` 知识库与项目画像模板、`progress.md` 进度账本、`audit_harness.py` 自检脚本），以及按 profile 生成的根级 CLAUDE.md（顶部带初始化横幅）。
 
 **注入后必做的三件事：**
 
-1. 改写根级 CLAUDE.md——按项目实际填写概述、目录结构、构建命令（消化全部 `TODO(项目定制)` 标记）
-2. 改写 `docs/ARCHITECTURE.md`——按实际模块填写边界、数据流、构建体系
+1. 执行 `/project-intake`——agent 扫描 README / 目录结构 / 构建配置，生成 `.harness/docs/PROJECT.md` 项目画像并改写根级 CLAUDE.md 的项目上下文段、消除初始化横幅（横幅残留为 audit P1：画像不采集完无法收尾）。这一步是 4.2 节"CLAUDE.md 声明项目上下文"的自动化落地
+2. 改写 `.harness/docs/ARCHITECTURE.md`——按实际模块填写边界、数据流、构建体系
 3. （multi 形态）用 harness-setup 流程为每个模块落地独立治理结构
 
 ### 5.3 日常工作流
@@ -237,16 +237,16 @@ python tools/audit_harness.py
 | 需求特征 | 评级 | 流程入口 |
 |---------|------|---------|
 | 单模块内部 | L0 | 模块内 Designer → Reviewer → Builder（4.4 节闭环） |
-| 接口同步 | L1 | 编写契约发布至 contracts/，各模块自行实现 |
+| 接口同步 | L1 | 编写契约发布至 .harness/contracts/，各模块自行实现 |
 | 跨 2-3 模块 | L2 | cross-module-change 流程：契约 → 确认 → 并行派发 → 架构审核 → 收尾 |
 | 全模块级 | L3 | 同 L2，Coordinator 全程主导 |
 
-所有收尾统一执行 `python tools/audit_harness.py`。
+所有收尾统一执行 `python .harness/audit_harness.py`。
 
 ## 6. 常见问题
 
 **Q：注入会覆盖现有文件吗？**
-A：会合并写入 `.claude/`、`contracts/`、`docs/`、`tools/` 等治理目录，并生成根级 `CLAUDE.md` 与 `harness/progress.md`。目标项目已有 CLAUDE.md 时请先备份——注入会覆盖它。
+A：治理文件全部收在 `.harness/` 单一命名空间，不触碰项目自有目录（`docs/`、`tools/`、`contracts/` 等完全归项目支配，卸载 = 删 `.harness/` + `.claude/` + `CLAUDE.md`）。唯一例外：根级 `CLAUDE.md`——注入会覆盖它，目标已有时请先备份。
 
 **Q：single 与 multi 可以互相切换吗？**
 A：可以。用另一个 profile 重新注入即可，会补齐对应形态的角色与技能。

@@ -10,17 +10,17 @@ python harness_installer.py --target /path/to/my_app --profile single
 cd /path/to/my_app
 
 # 3. 自检（应显示 [OK] Harness 自检通过）
-python tools/audit_harness.py
+python .harness/audit_harness.py
 ```
 
 注入后你得到：
 
 - `.claude/agents/` — designer / reviewer / builder 三角色
-- `.claude/skills/` — contract-writing + harness-setup
-- `docs/` — core-beliefs + ARCHITECTURE + standards + experience-library
-- `contracts/` — 契约模板与索引
-- `harness/progress.md` + `tools/audit_harness.py`
-- 根级 `CLAUDE.md`（单模块自治版）
+- `.claude/skills/` — contract-writing + harness-setup + project-intake
+- `.harness/contracts/` — 契约模板与索引
+- `.harness/docs/` — core-beliefs + ARCHITECTURE + _project 画像模板 + standards + experience-library
+- `.harness/progress.md` + `.harness/audit_harness.py`
+- 根级 `CLAUDE.md`（单模块自治版，顶部带初始化横幅）
 
 ## 场景二：微服务 / 前后端分离 / 多模块项目
 
@@ -32,7 +32,7 @@ python harness_installer.py --target /path/to/my_monorepo --profile multi
 cd /path/to/my_monorepo
 
 # 3. 自检
-python tools/audit_harness.py
+python .harness/audit_harness.py
 ```
 
 multi 比 single 多出：
@@ -43,14 +43,14 @@ multi 比 single 多出：
 
 ## 注入后必做的 3 件事
 
-1. **改写根级 CLAUDE.md** — 项目概述 + 目录结构 + `TODO(项目定制)` 段
-2. **改写 docs/ARCHITECTURE.md** — 真实分层 + 数据流 + 模块映射
+1. **执行 `/project-intake`** — agent 扫描 README / 目录 / 构建配置，生成 `.harness/docs/PROJECT.md` 项目画像，改写根级 CLAUDE.md 并消除初始化横幅（横幅残留 = audit P1，不采集完无法收尾）
+2. **改写 .harness/docs/ARCHITECTURE.md** — 真实分层 + 数据流 + 模块映射
 3. **落地模块**（multi）— 用 `harness-setup` skill 为每个模块生成独立 Harness
 
 ## 常见问题
 
 **Q：注入会覆盖我的现有文件吗？**
-A：会合并写入 `.claude/`、`contracts/`、`docs/`、`tools/` 等 Harness 专属目录，并**生成**根级 `CLAUDE.md` 与 `harness/progress.md`。如果目标已有 `CLAUDE.md`，请先备份——注入脚本会覆盖它。
+A：治理文件全部收在 `.harness/` 单一命名空间，不碰你项目的 `docs/`、`tools/` 等自有目录（卸载 = 删 `.harness/` + `.claude/` + `CLAUDE.md`）。唯一例外：根级 `CLAUDE.md` 会被覆盖，已有请先备份。
 
 **Q：single 和 multi 能互相切换吗？**
 A：可以。用另一个 profile 重新注入即可（会补齐/覆盖对应角色与技能）。

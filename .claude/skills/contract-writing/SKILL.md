@@ -37,13 +37,13 @@ description: "Writes the contract archive for cross-module changes. Use this whe
 | **4. 镜像参考模板** | 标注本需求镜像哪个已有模块套路（强制/建议两级，含差异点） | 发散模式 |
 | **5. 验证清单** | 编译验证 / 集成验证 / 真实环境验证三层次，每项可勾选 | 验证遗漏 |
 
-**5 章节缺一不可。** 完整格式参考 `contracts/_template.md`。
+**5 章节缺一不可。** 完整格式参考 `.harness/contracts/_template.md`。
 
 ## 编写流程（6 步）
 
 ### Step 1: 确认编号
 
-读契约索引 `contracts/index.md`，取当前最大编号 +1 作为新契约编号。
+读契约索引 `.harness/contracts/index.md`，取当前最大编号 +1 作为新契约编号。
 
 - 编号格式：三位数字递增（NNN）
 - 文件名：`NNN_<kebab-case-english-name>.md`
@@ -54,7 +54,7 @@ description: "Writes the contract archive for cross-module changes. Use this whe
 
 ### Step 3: 写 Decision 5 章节
 
-按 `contracts/_template.md` 的 5 章节结构写 Decision 段：
+按 `.harness/contracts/_template.md` 的 5 章节结构写 Decision 段：
 
 #### 3.1 接口契约 — 消息/接口定义逐字段表 + 全组合速查 + 示例 + 容量/性能预算
 #### 3.2 责任划分 — 各端新增/修改文件清单 + 公开 API + 关键约束
@@ -68,7 +68,7 @@ description: "Writes the contract archive for cross-module changes. Use this whe
 
 ### Step 5: 更新契约索引
 
-在 `contracts/index.md` 追加新条目（编号 + 标题 + 日期 + 一句话摘要）。
+在 `.harness/contracts/index.md` 追加新条目（编号 + 标题 + 日期 + 一句话摘要）。
 
 ### Step 6: 状态 Proposed
 
@@ -82,7 +82,7 @@ description: "Writes the contract archive for cross-module changes. Use this whe
 
 ### 1. 先读格式参考再动手
 
-编写契约前必须先读 `contracts/_template.md`（5 章节标准格式）。它包含全部细节结构，是单一真相源。
+编写契约前必须先读 `.harness/contracts/_template.md`（5 章节标准格式）。它包含全部细节结构，是单一真相源。
 
 **为什么：** skill 是流程编排器，不重复模板内容。跳过格式参考直接动手会漏章节或格式不一致。
 
@@ -112,7 +112,7 @@ agent 只写 Proposed，不能自作主张翻 Accepted。
 
 | 读取什么 | 从哪读 |
 |----------|--------|
-| 契约格式参考 | `contracts/_template.md` |
-| 契约索引路径 | `contracts/index.md` |
-| 跨模块流程与教训 | `contracts/workflows/cross-module-change.md` |
+| 契约格式参考 | `.harness/contracts/_template.md` |
+| 契约索引路径 | `.harness/contracts/index.md` |
+| 跨模块流程与教训 | `.harness/contracts/workflows/cross-module-change.md` |
 | 项目 commit 策略 | 根级 CLAUDE.md |

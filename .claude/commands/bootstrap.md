@@ -16,13 +16,11 @@ python universal-ai-harness/harness_installer.py --target <目标路径> --profi
 
 - `single`：单模块自治（designer / reviewer / builder 三角色）
 - `multi`：多模块集成（五角色 + cross-module-change 协同）
-- 注入后改写生成的 `CLAUDE.md` 项目概述 + 目录结构 + 编译命令
-- 收尾：`python tools/audit_harness.py`
+- 注入后 CLAUDE.md 带初始化横幅 → 执行 `/project-intake` 采集项目画像（生成 `.harness/docs/PROJECT.md` 并消除横幅）
+- 收尾：`python .harness/audit_harness.py`
 
 ## B. 新模块落地（已有项目内新增模块）
 
 走 `harness-setup` skill 的 9 步流程：
 
 选模板 → 复制改名 → 改写 CLAUDE.md → 改写 core-beliefs / ARCHITECTURE → 落地 design-docs → 写 progress → 定制三角色 → 更新根级引用。
-
-> 嵌入式组合用法：先 `extract_kit.py` 提代码骨架，再注入治理框架。

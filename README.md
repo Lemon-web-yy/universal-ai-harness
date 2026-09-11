@@ -7,8 +7,9 @@
 - **L0-L3 评级路由** — 按需求联系强度选择流程重量（能轻不重）
 - **契约先行** — 跨模块变更先写 5 章节契约档案，再动代码
 - **三角色分工** — Designer（设计）/ Reviewer（审核）/ Builder（实现）+ 根级 Coordinator / Architect-Reviewer
-- **档案四级体系** — 精简 ADR（Context/Decision/Consequences）防决策蒸发
+- **档案四级体系** — 档案纪律随 L0-L3 评级加权，精简 ADR（Context/Decision/Consequences）防决策蒸发
 - **镜像参考模板** — 强制标注镜像源，防同类模块发散
+- **项目画像采集** — 注入后 agent 扫描项目本体生成 PROJECT.md，补齐项目上下文
 - **索引自检** — 脚本机械拦截索引与实体漂移
 
 ## 适用场景
@@ -30,11 +31,13 @@ universal-ai-harness/
 ├── SOP.md                      # Agent 协作入门 SOP（对外文章，不随注入分发）
 ├── .claude/
 │   ├── agents/                 # 五角色：coordinator / architect-reviewer / designer / reviewer / builder
-│   └── skills/                 # 三技能：contract-writing / cross-module-change / harness-setup
-├── contracts/                  # 跨模块契约体系（5 章节模板 + 索引 + 工作流）
-├── docs/                       # core-beliefs + ARCHITECTURE + standards + experience-library + design-docs
-├── harness/progress.md         # 运行时进度模板
-└── tools/audit_harness.py      # 索引自检工具
+│   ├── skills/                 # 四技能：contract-writing / cross-module-change / harness-setup / project-intake
+│   └── commands/               # 快捷指令：bootstrap / cycle / project-intake
+└── .harness/                   # 治理框架单一命名空间（注入产物与之同构）
+    ├── contracts/              # 跨模块契约体系（5 章节模板 + 索引 + 工作流）
+    ├── docs/                   # core-beliefs + ARCHITECTURE + _project 画像模板 + standards + experience-library + design-docs
+    ├── progress.md             # 运行时进度模板
+    └── audit_harness.py        # 索引自检工具
 ```
 
 ## 快速开始
@@ -43,9 +46,12 @@ universal-ai-harness/
 # 注入到你的项目（以 multi 为例）
 python harness_installer.py --target /path/to/your_project --profile multi
 
-# 进入项目跑自检
+# 进入项目，采集项目画像（生成 .harness/docs/PROJECT.md，消除 CLAUDE.md 初始化横幅）
 cd /path/to/your_project
-python tools/audit_harness.py
+/project-intake
+
+# 自检
+python .harness/audit_harness.py
 ```
 
 详见 [QUICKSTART.md](QUICKSTART.md)。

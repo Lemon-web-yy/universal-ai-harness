@@ -19,13 +19,13 @@ description: "Orchestrates the cross-module workflow for changes spanning 2+ mod
 - 单模块内部需求 → 模块内 Designer → Reviewer → Builder 流程
 - 新模块 harness 落地 → harness-setup skill
 
-**判断方法：** 需求是否涉及多个模块目录 + 是否需要接口同步。是 → 先做 L0-L3 评级（见 `contracts/workflows/cross-module-change.md`），L1 及以上走本 skill。
+**判断方法：** 需求是否涉及多个模块目录 + 是否需要接口同步。是 → 先做 L0-L3 评级（见 `.harness/contracts/workflows/cross-module-change.md`），L1 及以上走本 skill。
 
 ## 分步流程
 
 ### L1 — 契约同步（3 步）
 
-1. Coordinator 写 `contracts/NNN_*.md`（5 章节）
+1. Coordinator 写 `.harness/contracts/NNN_*.md`（5 章节）
 2. 用户审核契约（spec review gate）
 3. 各模块按需 Read 契约 → 各自走 L0 流程实现
 
@@ -35,7 +35,7 @@ description: "Orchestrates the cross-module workflow for changes spanning 2+ mod
 2. **用户 spec review gate（硬停止）**：契约是架构决策，agent 不能替用户做——用户不点头不往下走
 3. **并行派发**：按契约派发 Builder 子 agent（仅列实际参与者，prompt 给路径不给全文）
 4. **架构审核**：派发 Architect-Reviewer（六维审核，P0 必修）
-5. **收尾归档**：三层验证 + 更新索引 + `tools/audit_harness.py` 核对
+5. **收尾归档**：三层验证 + 更新索引 + `.harness/audit_harness.py` 核对
 
 ## 关键决策
 
@@ -73,7 +73,7 @@ Architect-Reviewer 的 P0 问题必须修复后才能收尾，P1/P2 可延后。
 
 ### 3. 收尾必跑索引自检
 
-`python tools/audit_harness.py` 确认契约索引与实体一致。
+`python .harness/audit_harness.py` 确认契约索引与实体一致。
 
 **为什么：** 索引漂移让后续 agent 按索引导航扑空。
 
@@ -81,8 +81,8 @@ Architect-Reviewer 的 P0 问题必须修复后才能收尾，P1/P2 可延后。
 
 | 读取什么 | 从哪读 |
 |----------|--------|
-| L0-L3 评级与流程 | `contracts/workflows/cross-module-change.md` |
-| 契约格式 | `contracts/_template.md` |
-| 根级核心规则 | `docs/core-beliefs.md` |
+| L0-L3 评级与流程 | `.harness/contracts/workflows/cross-module-change.md` |
+| 契约格式 | `.harness/contracts/_template.md` |
+| 根级核心规则 | `.harness/docs/core-beliefs.md` |
 | 角色定义 | `.claude/agents/coordinator.md`、`.claude/agents/architect-reviewer.md` |
-| 经验教训（编号引用） | `contracts/workflows/cross-module-change.md` 经验教训区 |
+| 经验教训（编号引用） | `.harness/contracts/workflows/cross-module-change.md` 经验教训区 |

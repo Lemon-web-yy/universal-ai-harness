@@ -23,15 +23,15 @@
 
 | 优先级 | 事项 | 备注 |
 |--------|------|------|
-| P1 | 按项目实际改写根级 CLAUDE.md 模块概览表 | TODO(项目定制) 段落逐个消化 |
-| P1 | 改写 docs/ARCHITECTURE.md 模块边界/数据流/构建体系 | 同上 |
+| P1 | 执行 /project-intake 采集项目画像 | 消除 CLAUDE.md 初始化横幅（audit P1 硬约束） |
+| P2 | 改写 .harness/docs/ARCHITECTURE.md 模块边界/数据流/构建体系 | 模块孵化后逐步完善 |
 | P2 | 确认 Commit 分支策略并回填 core-beliefs/CLAUDE.md | 用户决策 |
 
 ## 下一 session 交接班
 
-- **当前进度：** 初始化完成，未开始业务开发
-- **下一步选择：** ① 落地第一个模块（harness-setup）② 直接提需求
-- **关键路径文件：** `CLAUDE.md`（模块概览待填）→ `docs/ARCHITECTURE.md`（架构待填）→ 各模块 `CLAUDE.md`
+- **当前进度：** 初始化完成，项目画像未采集
+- **下一步选择：** ① /project-intake 采集画像（首推）② 落地第一个模块（harness-setup）
+- **关键路径文件：** `CLAUDE.md`（横幅待消除）→ `.harness/docs/PROJECT.md`（画像待采集）→ `.harness/docs/ARCHITECTURE.md`（架构待填）
 
 ## 已知问题
 

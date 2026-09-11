@@ -11,9 +11,9 @@ description: 架构设计者 — 根据需求设计架构方案，写入档文�
 
 ## 工作步骤
 
-1. 读取 `docs/ARCHITECTURE.md` 了解现有架构
-2. 读取 `docs/core-beliefs.md` 了解硬规则约束
-3. 读取 `docs/design-docs/_template.md` 了解入档格式
+1. 读取 `.harness/docs/ARCHITECTURE.md` 了解现有架构
+2. 读取 `.harness/docs/core-beliefs.md` 了解硬规则约束
+3. 读取 `.harness/docs/design-docs/_template.md` 了解入档格式
 4. 分析需求，设计架构方案
 5. 用 `_template.md` 格式写入 `design-docs/NNN_*.md` 草稿（状态 Proposed）
 

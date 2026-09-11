@@ -1,11 +1,11 @@
 ---
 name: harness-setup
-description: "Bootstraps the harness structure (docs/ + harness/ + .claude/agents/) for a new module when its source enters the project. Use this whenever a new module's source is being onboarded — copies the matching module template, writes CLAUDE.md + docs trio + design-docs template + experience-library + harness/progress.md, customizes designer/reviewer/builder agents, and updates root-level references. Even if the user just says 'set up harness for module X' or 'onboard the new module' without mentioning the template, use this skill to ensure the standard structure is followed."
+description: "Bootstraps the harness structure (.harness/ + .claude/agents/) for a new module when its source enters the project. Use this whenever a new module's source is being onboarded — copies the matching module template, writes CLAUDE.md + .harness/docs trio + design-docs template + experience-library + .harness/progress.md, customizes designer/reviewer/builder agents, and updates root-level references. Even if the user just says 'set up harness for module X' or 'onboard the new module' without mentioning the template, use this skill to ensure the standard structure is followed."
 ---
 
 # Harness-Setup Workflow（新模块 Harness 落地）
 
-为新模块落地标准 Harness 三层结构（docs/ + harness/ + .claude/agents/），并更新根级引用。
+为新模块落地标准 Harness 双层结构（.harness/ 单一命名空间 + .claude/agents/），并更新根级引用。
 
 ## When to Use
 
@@ -20,15 +20,15 @@ description: "Bootstraps the harness structure (docs/ + harness/ + .claude/agent
 
 ## 落地流程（9 步）
 
-1. **选模板**：按模块形态选对应的模块模板（技术栈无关的通用结构，或项目内已有同类模块）
+1. **选基线**：项目内已有同类模块 → 镜像之；全新项目无模板可镜 → 按 `.harness/docs/standards/harness-template.md` 标准结构从零落地
 2. **复制改名**：复制到根级，改名为 `<Xxx_Module>`（项目命名）
 3. **改写 CLAUDE.md**：项目概述 + 真实目录结构 + 硬规则按模块定制
-4. **改写 docs/core-beliefs.md**（每条注"防止了什么失败"）
-5. **改写 docs/ARCHITECTURE.md**（真实分层 + 数据流 + 依赖/模块映射）
+4. **改写 .harness/docs/core-beliefs.md**（每条注"防止了什么失败"）
+5. **改写 .harness/docs/ARCHITECTURE.md**（真实分层 + 数据流 + 依赖/模块映射）
 6. **落地 design-docs/**：`_template.md` + 空 `index.md`
-7. **写 harness/progress.md** 初始状态
+7. **写 .harness/progress.md** 初始状态
 8. **定制 .claude/agents/ 三角色**（模块名 + 构建方式 + 架构规则）
-9. **更新根级引用**：根级 CLAUDE.md 模块概览表 + 根级 harness/progress.md 模块状态表
+9. **更新根级引用**：根级 CLAUDE.md 模块概览表 + 根级 .harness/progress.md 模块状态表
 
 ## 关键决策
 
@@ -36,9 +36,9 @@ description: "Bootstraps the harness structure (docs/ + harness/ + .claude/agent
 
 **为什么：** 直接复制模板的 core-beliefs 会导致审核变橡皮图章——规则与本模块脱节，agent 也不会认真执行。每条规则必须能回答"防止了本模块哪种真实失败"。
 
-### 2. 选对形态模板
+### 2. 选对基线
 
-不同技术栈/形态的构建方式、编译验证能力、硬规则各不相同，选错模板等于从错误基线出发。
+项目内有同类模块时必须镜像它（结构与约定一致，后来者零学习成本）；从零落地时以标准结构为基线，再按模块技术栈适配构建方式与编译验证能力。
 
 ### 3. 构建登记 checklist 落地
 
@@ -48,16 +48,16 @@ description: "Bootstraps the harness structure (docs/ + harness/ + .claude/agent
 
 - [ ] CLAUDE.md 行数 80~100（`wc -l`）
 - [ ] CLAUDE.md 段落数 `grep -c "^## "` ≈ 8（6~9 区间）
-- [ ] 无 `{{PROJECT_NAME}}` 残留：`grep -r "{{PROJECT_NAME}}" --include="*.md"` 应只在明确待定制处命中
+- [ ] 无项目名占位符残留：`grep -r "PROJECT_NAME" --include="*.md"` 应只在明确待定制处命中
 - [ ] 三角色齐全：`.claude/agents/` 含 designer/reviewer/builder
 - [ ] 根级 CLAUDE.md 模块概览表已加行
-- [ ] `python tools/audit_harness.py` 通过
+- [ ] `python .harness/audit_harness.py` 通过
 
 ## Key Discipline
 
 ### 1. 先读标准再动手
 
-读 `docs/standards/harness-template.md`（标准结构 + 文件职责清单 + 落地 checklist）。
+读 `.harness/docs/standards/harness-template.md`（标准结构 + 文件职责清单 + 落地 checklist）。
 
 **为什么：** 标准是单一真相源，含"该写什么/不该写什么"双向清单，跳过会漏项。
 
@@ -71,7 +71,7 @@ description: "Bootstraps the harness structure (docs/ + harness/ + .claude/agent
 
 | 读取什么 | 从哪读 |
 |----------|--------|
-| Harness 标准模板 | `docs/standards/harness-template.md` |
-| Mock 与测试规范 | `docs/standards/mock-and-testing.md` |
-| 索引自检规范 | `docs/standards/harness-audit.md` |
-| 根级核心规则 | `docs/core-beliefs.md` |
+| Harness 标准模板 | `.harness/docs/standards/harness-template.md` |
+| Mock 与测试规范 | `.harness/docs/standards/mock-and-testing.md` |
+| 索引自检规范 | `.harness/docs/standards/harness-audit.md` |
+| 根级核心规则 | `.harness/docs/core-beliefs.md` |

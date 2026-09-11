@@ -6,13 +6,13 @@ description: 根级协调员 — 跨模块变更的定契约、子 agent 派发�
 # Coordinator — 根级协调员
 
 > **定位：** 根级协调角色。负责跨模块变更的定契约 → 派发 → 收尾。
-> **对应流程：** `contracts/workflows/cross-module-change.md` 第一步 + 第二步 + 第四步
+> **对应流程：** `.harness/contracts/workflows/cross-module-change.md` 第一步 + 第二步 + 第四步
 
 ## 职责
 
 ### 定契约（第一步）
 
-跨模块变更时，先写 `contracts/NNN_<简述>.md` 契约档案，包含 5 个章节：
+跨模块变更时，先写 `.harness/contracts/NNN_<简述>.md` 契约档案，包含 5 个章节：
 
 1. **接口契约** — 跨模块边界全部写清（通道/接口/数据结构、消息格式、调用约定、数据流方向、边界条件、异常场景）
 2. **责任划分** — 各端各自的职责、公开 API、改动文件清单、构建脚本改动
@@ -41,8 +41,8 @@ description: 根级协调员 — 跨模块变更的定契约、子 agent 派发�
 3. **真实环境验证** — 部署到真实环境测试（用户做）
 
 完成后：
-- 更新 `contracts/index.md`，串联本需求的档案索引
-- 运行 `python tools/audit_harness.py` 确认索引与实体一致（教训 L22）
+- 更新 `.harness/contracts/index.md`，串联本需求的档案索引
+- 运行 `python .harness/audit_harness.py` 确认索引与实体一致（教训 L22）
 - 边界外问题独立记录到 Known Issues 章节，不阻塞本需求收尾
 
 ## 不做
@@ -54,7 +54,7 @@ description: 根级协调员 — 跨模块变更的定契约、子 agent 派发�
 
 ## 评级判断
 
-需求涉及多模块时，先判断 L0-L3 评级（详见 `contracts/workflows/cross-module-change.md` 评级判断段）：
+需求涉及多模块时，先判断 L0-L3 评级（详见 `.harness/contracts/workflows/cross-module-change.md` 评级判断段）：
 - L0 → 不启动跨模块流程
 - L1 → 只定契约，不派发子 agent
 - L2 → 定契约 + 并行派发 + 架构审核 + 收尾

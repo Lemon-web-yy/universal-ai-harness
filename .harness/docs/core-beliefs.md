@@ -11,13 +11,13 @@
 | 评级 | 联系方式 | 流程 |
 |---|---|---|
 | L0 纯独立 | 各模块自己干 | 不走跨模块流程，按模块 CLAUDE.md |
-| L1 契约同步 | 发布契约到 contracts/，按需订阅 | 只定契约不派发 |
+| L1 契约同步 | 发布契约到 .harness/contracts/，按需订阅 | 只定契约不派发 |
 | L2 协调开发 | Coordinator 轻度协调，并行实现 | 定契约+并行派发+架构审核+收尾 |
 | L3 统一编排 | Coordinator 全程主导 | 完整流程 |
 
-**评级依据：** 联系强度 = 需求涉及几个模块 + 是否需要接口同步。能 L0 不 L1，能 L1 不 L2，能 L2 不 L3（防止杀鸡用牛刀，流程重量与需求重量不匹配）。详见 `contracts/workflows/cross-module-change.md`。
+**评级依据：** 联系强度 = 需求涉及几个模块 + 是否需要接口同步。能 L0 不 L1，能 L1 不 L2，能 L2 不 L3（防止杀鸡用牛刀，流程重量与需求重量不匹配）。详见 `.harness/contracts/workflows/cross-module-change.md`。
 
-### 2. 契约先行（跨模块变更先写 contracts/NNN_*.md）
+### 2. 契约先行（跨模块变更先写 .harness/contracts/NNN_*.md）
 
 跨模块变更必须先写契约档案（5 章节：接口契约 + 责任划分 + 不做的事 + 镜像参考模板 + 验证清单），再派发子 agent。**此时不写代码，只定契约。**
 
@@ -31,12 +31,14 @@
 
 ## 档案纪律
 
-### 4. 档案四级体系
+### 4. 档案体系（随 L0-L3 评级加权）
 
 | 层级 | 位置 | 职责 |
 |------|------|------|
-| 根级 | `contracts/` | 跨模块决策（L1 契约发布） |
-| 模块级 | `<各模块>/docs/design-docs/` | 模块内部决策 |
+| 根级 | `.harness/contracts/` | 跨模块决策（L1 契约发布） |
+| 模块级 | `<各模块>/.harness/docs/design-docs/` | 模块内部决策 |
+
+**评级映射：** L0 → 仅模块级 ADR；L1 → 根级契约发布（各模块按需实现）；L2/L3 → 根级契约 + 并行派发 + 架构审核 + 收尾归档。档案要求随评级加重（评级定义见 §1）。
 
 格式：精简 ADR（Context / Decision / Consequences）。命名 `NNN_<kebab-case>.md`，三位数字递增。状态：Proposed → Accepted → Deprecated（Accepted 由用户拍板）。Scope 精确到文件/函数。触发：架构调整 / 跨模块修改 / 接口变更。流程：先写 md 再动代码。
 
@@ -50,7 +52,7 @@
 
 ### 6. 收尾必跑索引自检
 
-任何收尾归档前必须运行 `python tools/audit_harness.py`，确认契约索引与实体文件一致、ADR 编号无冲突、CLAUDE.md 体量未膨胀。
+任何收尾归档前必须运行 `python .harness/audit_harness.py`，确认契约索引与实体文件一致、ADR 编号无冲突、CLAUDE.md 体量未膨胀。
 
 **防止：** 索引与实体漂移（源工程曾出现索引写 001-004 实际已 007 的滞后，agent 按索引找档案扑空）。
 

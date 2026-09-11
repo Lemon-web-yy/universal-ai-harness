@@ -3,8 +3,8 @@
 """
 universal-ai-harness 一键注入脚本
 
-将通用 AI 治理框架（.claude / contracts / docs / harness / tools）注入任意目标项目，
-并根据 --profile 生成符合规范的初始 CLAUDE.md 与 harness/progress.md。
+将通用 AI 治理框架（.claude + .harness 单一命名空间）注入任意目标项目，
+并根据 --profile 生成符合规范的初始 CLAUDE.md（含 {{INTAKE_PENDING}} 初始化横幅）与 .harness/progress.md。
 
 用法：
     # 多模块项目（含跨模块协同：coordinator + architect-reviewer + contracts + cross-module-change）
@@ -74,21 +74,23 @@ def copy_commands(target: Path):
 
 
 def copy_contracts(target: Path):
-    """注入 contracts/（跨模块契约体系）。"""
-    src = HARNESS_ROOT / "contracts"
-    shutil.copytree(str(src), str(target / "contracts"), dirs_exist_ok=True)
+    """注入 .harness/contracts/（跨模块契约体系）。"""
+    src = HARNESS_ROOT / ".harness" / "contracts"
+    shutil.copytree(str(src), str(target / ".harness" / "contracts"), dirs_exist_ok=True)
 
 
 def copy_docs(target: Path):
-    """注入 docs/（core-beliefs + ARCHITECTURE + standards + experience-library）。"""
-    src = HARNESS_ROOT / "docs"
-    shutil.copytree(str(src), str(target / "docs"), dirs_exist_ok=True)
+    """注入 .harness/docs/（core-beliefs + ARCHITECTURE + standards + experience-library + _project 模板）。"""
+    src = HARNESS_ROOT / ".harness" / "docs"
+    shutil.copytree(str(src), str(target / ".harness" / "docs"), dirs_exist_ok=True)
 
 
-def copy_tools(target: Path):
-    """注入 tools/audit_harness.py。"""
-    src = HARNESS_ROOT / "tools"
-    shutil.copytree(str(src), str(target / "tools"), dirs_exist_ok=True)
+def copy_audit_script(target: Path):
+    """注入 .harness/audit_harness.py（不触碰目标项目自有 tools/ 等目录）。"""
+    src = HARNESS_ROOT / ".harness" / "audit_harness.py"
+    dst = target / ".harness"
+    dst.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(str(src), str(dst / "audit_harness.py"))
 
 
 def write_claude_md(target: Path, name: str, profile: str):
@@ -102,8 +104,8 @@ def write_claude_md(target: Path, name: str, profile: str):
 
 
 def write_progress(target: Path, name: str, profile: str):
-    """生成目标 harness/progress.md。"""
-    src = HARNESS_ROOT / "harness" / "progress.md"
+    """生成目标 .harness/progress.md。"""
+    src = HARNESS_ROOT / ".harness" / "progress.md"
     text = src.read_text(encoding="utf-8")
     today = datetime.date.today().isoformat()
     text = (
@@ -111,18 +113,19 @@ def write_progress(target: Path, name: str, profile: str):
         .replace("YYYY-MM-DD", today)
         .replace("__PROFILE__", PROFILE_LABEL[profile])
     )
-    dst = target / "harness"
+    dst = target / ".harness"
     dst.mkdir(parents=True, exist_ok=True)
     (dst / "progress.md").write_text(text, encoding="utf-8")
 
 
+# 占位符替换的文本后缀清单（须与 .harness/audit_harness.py 的检查清单保持同步）
 TEXT_SUFFIXES = (".md", ".py", ".pro", ".c", ".h", ".cpp", ".hpp", ".yml", ".yaml", ".rs", ".js", ".ts", ".go", ".java")
 
 
 def replace_placeholders(root: Path, name: str):
     """递归替换已注入模板中的 {{PROJECT_NAME}}。"""
     # 工具脚本自身定义 PLACEHOLDER 常量，属功能必需，须排除
-    tool_scripts = {"harness_installer.py", "audit_harness.py", "extract_kit.py", "init_project.py"}
+    tool_scripts = {"harness_installer.py", "audit_harness.py"}
     count = 0
     for p in root.rglob("*"):
         if not p.is_file() or p.suffix not in TEXT_SUFFIXES:
@@ -156,7 +159,7 @@ def run(args):
     copy_commands(target)
     copy_contracts(target)
     copy_docs(target)
-    copy_tools(target)
+    copy_audit_script(target)
     write_claude_md(target, name, profile)
     write_progress(target, name, profile)
     n = replace_placeholders(target, name)
@@ -166,13 +169,14 @@ def run(args):
     print("注入完成。下一步：")
     print("=" * 60)
     print(f"1. 进入项目：cd {target}")
-    print(f"2. 改写 CLAUDE.md 项目概述 + 目录结构（含 TODO(项目定制) 段）")
-    print(f"3. 改写 docs/ARCHITECTURE.md 分层/数据流/模块映射")
+    print(f"2. 执行 /project-intake 采集项目画像（生成 .harness/docs/PROJECT.md，")
+    print(f"   改写 CLAUDE.md 概述/目录结构段并消除初始化横幅）")
+    print(f"3. 改写 .harness/docs/ARCHITECTURE.md 分层/数据流/模块映射")
     if profile == "multi":
         print(f"4. 用 harness-setup 流程落地各模块")
     else:
         print(f"4. 确认 commit 分支策略并回填 CLAUDE.md")
-    print(f"5. 自检：python tools/audit_harness.py")
+    print(f"5. 自检：python .harness/audit_harness.py")
     print("=" * 60)
     return 0
 
@@ -185,70 +189,79 @@ MULTI_CLAUDE_TEMPLATE = """# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> ⚠️ **初始化未完成** {{INTAKE_PENDING}} — 项目画像未采集。
+> **立即执行 `/project-intake`**：生成 `.harness/docs/PROJECT.md` 并改写本文件概述/目录结构段，横幅随之消除。
+
 ## 项目概述
 
 {{PROJECT_NAME}} — 基于 universal-ai-harness 治理框架生成的多模块集成项目。
 
-本仓库当前为**多模块集成形态**：根级统筹协调，各模块自治开发。跨模块通过契约档案（`contracts/`）对齐接口，模块内按各自 CLAUDE.md 自治。
+> 本段为占位描述；项目真实定位/技术栈/运行方式由 `/project-intake` 采集至 `.harness/docs/PROJECT.md`。
+
+本仓库当前为**多模块集成形态**：根级统筹协调，各模块自治开发。跨模块通过契约档案（`.harness/contracts/`）对齐接口，模块内按各自 CLAUDE.md 自治。
 
 ## 模块概览
 
 | 模块 | 目录 | 性质 | 技术栈 | 详情入口 |
 |------|------|------|--------|----------|
-| （示例）核心服务 | `<Core_Module>/` | 业务核心 | 待定 | `<Core_Module>/CLAUDE.md` |
-
-> TODO(项目定制)：模块落地后更新上表（用 harness-setup 流程孵化）。
+| （待 `/project-intake` 采集 / 模块孵化后更新） | | | | |
 
 ## 目录结构
 
 ```
 {{PROJECT_NAME}}/
-├── contracts/                 ← 跨模块契约档案（L1 发布点）
-├── docs/                      ← 根级知识库（core-beliefs + ARCHITECTURE + standards + experience-library）
+├── CLAUDE.md                  ← 本文件（agent 入口路由）
 ├── .claude/                   ← 根级角色（coordinator + architect-reviewer）+ skills
-├── harness/progress.md        ← 根级运行时进度
-└── tools/audit_harness.py     ← 索引自检脚本
+└── .harness/                  ← 治理框架单一命名空间（卸载即删此目录）
+    ├── contracts/             ← 跨模块契约档案（L1 发布点）
+    ├── docs/                  ← 知识库 + PROJECT.md 项目画像
+    ├── progress.md            ← 根级运行时进度
+    └── audit_harness.py       ← 索引自检脚本
 ```
+
+> 项目自身源码目录（src/ 等）的结构导读由 `/project-intake` 采集后补充。
 
 ## 跨模块协同
 
-**L0-L3 评级**（联系强度，详见 `docs/core-beliefs.md`）：L0 独立实现 → L1 契约发布到 `contracts/` → L2 根 agent 轻度协调 → L3 根 agent 全程主导。**能 L0 不 L1，能 L1 不 L2。**
+**L0-L3 评级**（联系强度，详见 `.harness/docs/core-beliefs.md`）：L0 独立实现 → L1 契约发布到 `.harness/contracts/` → L2 根 agent 轻度协调 → L3 根 agent 全程主导。**能 L0 不 L1，能 L1 不 L2。**
 
-**跨模块流程**：需求涉及 2+ 模块时，遵循 `contracts/workflows/cross-module-change.md`（定契约 → 派发子 agent → 各自治实现 → 架构审核 → 收尾归档）。
+**跨模块流程**：需求涉及 2+ 模块时，遵循 `.harness/contracts/workflows/cross-module-change.md`（定契约 → 派发子 agent → 各自治实现 → 架构审核 → 收尾归档）。
 
 ## Skill 路由表
 
 | 场景 | 触发条件 | 走什么流程 |
 |------|----------|-----------|
+| 项目画像采集 | CLAUDE.md 存在初始化横幅 | `project-intake` skill |
 | L0 单模块 | 需求只涉及单个模块内部 | 模块内 Designer → Reviewer → Builder 流程 |
 | L1/L2/L3 跨模块 | 需求涉及 2+ 模块 | `cross-module-change` skill |
 | 新模块落地 | 新模块源码进入项目 | `harness-setup` skill |
 | 契约编写 | 编写跨模块契约档案 | `contract-writing` skill |
-| 收尾自检 | 任何收尾归档前 | `python tools/audit_harness.py` |
+| 收尾自检 | 任何收尾归档前 | `python .harness/audit_harness.py` |
 
 ## 编译命令速查
 
-> TODO(项目定制)：各模块初始化后在此登记编译命令。
+> 待 `/project-intake` 采集后登记（agent 可否执行编译验证一并标注）。
 
 ## 关键约定
 
-> TODO(项目定制)：登记跨模块通信介质（消息总线 / 队列 / API 等）。
+> 待 `/project-intake` 采集后登记跨模块通信介质（消息总线 / 队列 / API 等）。
 
 ## 档案纪律
 
-**四级体系**（详见 `docs/core-beliefs.md`）：根级 `contracts/` 发布跨模块契约（L1），各模块 `docs/design-docs/` 记录内部决策。格式：精简 ADR（Context / Decision / Consequences），命名 `NNN_<kebab-case>.md`。触发：架构调整 / 跨模块修改 / 接口变更。流程：先写 md 再动代码。
+**四级体系**（随 L0-L3 评级加权，详见 `.harness/docs/core-beliefs.md`）：根级 `.harness/contracts/` 发布跨模块契约（L1），各模块 `.harness/docs/design-docs/` 记录内部决策；档案要求随评级加重（L0 仅模块 ADR → L2/L3 契约+派发+审核+收尾）。格式：精简 ADR（Context / Decision / Consequences），命名 `NNN_<kebab-case>.md`。触发：架构调整 / 跨模块修改 / 接口变更。流程：先写 md 再动代码。
 
 ## 入口文档
 
 | 文档 | 路径 | 说明 |
 |------|------|------|
-| 核心信念 | `docs/core-beliefs.md` | L0-L3 评级 + 档案纪律 + 协作规则 |
-| 架构总览 | `docs/ARCHITECTURE.md` | 模块边界 + 通信协议（需项目化更新） |
-| 标准规范 | `docs/standards/` | Harness 模板 + Mock 规范 + 自检规范 |
-| 经验库 | `docs/experience-library/` | 教训沉淀 |
-| 契约索引 | `contracts/index.md` | 跨模块契约档案列表 |
-| 工作流 | `contracts/workflows/cross-module-change.md` | L0-L3 评级分段协同流程 |
-| 自检工具 | `tools/audit_harness.py` | 索引/编号/体量核对 |
+| 项目画像 | `.harness/docs/PROJECT.md` | 项目是什么/怎么跑/硬约束（intake 产物） |
+| 核心信念 | `.harness/docs/core-beliefs.md` | L0-L3 评级 + 档案纪律 + 协作规则 |
+| 架构总览 | `.harness/docs/ARCHITECTURE.md` | 模块边界 + 通信协议（需项目化更新） |
+| 标准规范 | `.harness/docs/standards/` | Harness 模板 + Mock 规范 + 自检规范 |
+| 经验库 | `.harness/docs/experience-library/` | 教训沉淀 |
+| 契约索引 | `.harness/contracts/index.md` | 跨模块契约档案列表 |
+| 工作流 | `.harness/contracts/workflows/cross-module-change.md` | L0-L3 评级分段协同流程 |
+| 自检工具 | `.harness/audit_harness.py` | 索引/编号/体量核对 |
 
 ## Commit 策略
 
@@ -259,9 +272,14 @@ SINGLE_CLAUDE_TEMPLATE = """# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> ⚠️ **初始化未完成** {{INTAKE_PENDING}} — 项目画像未采集。
+> **立即执行 `/project-intake`**：生成 `.harness/docs/PROJECT.md` 并改写本文件概述/目录结构段，横幅随之消除。
+
 ## 项目概述
 
 {{PROJECT_NAME}} — 基于 universal-ai-harness 治理框架生成的单模块项目。
+
+> 本段为占位描述；项目真实定位/技术栈/运行方式由 `/project-intake` 采集至 `.harness/docs/PROJECT.md`。
 
 本仓库当前为**单模块自治形态**：模块内按 Designer → Reviewer → Builder 流程自治开发，无跨模块协同层。
 
@@ -269,18 +287,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 {{PROJECT_NAME}}/
-├── contracts/                 ← 契约档案（5 章节规范体系）
-├── docs/                      ← 知识库（core-beliefs + ARCHITECTURE + standards + experience-library）
+├── CLAUDE.md                  ← 本文件（agent 入口路由）
 ├── .claude/                   ← 角色（designer + reviewer + builder）+ skills
-├── harness/progress.md        ← 运行时进度
-└── tools/audit_harness.py     ← 索引自检脚本
+└── .harness/                  ← 治理框架单一命名空间（卸载即删此目录）
+    ├── contracts/             ← 契约档案（5 章节规范体系）
+    ├── docs/                  ← 知识库 + PROJECT.md 项目画像
+    ├── progress.md            ← 运行时进度
+    └── audit_harness.py       ← 索引自检脚本
 ```
+
+> 项目自身源码目录（src/ 等）的结构导读由 `/project-intake` 采集后补充。
 
 ## 工作流
 
-新增需求 → 模块内 Designer → Reviewer → Builder 流程（详见 `docs/core-beliefs.md`）：
+新增需求 → 模块内 Designer → Reviewer → Builder 流程（详见 `.harness/docs/core-beliefs.md`）：
 
-1. **Designer** 设计架构，写 `docs/design-docs/NNN_*.md` 草稿
+1. **Designer** 设计架构，写 `.harness/docs/design-docs/NNN_*.md` 草稿
 2. **Reviewer** 审核设计（需求 + 架构 + 格式）
 3. 用户确认设计
 4. **Builder** 按 Scope 实现 + 编译验证（无法编译标 `[未验证]`）
@@ -291,27 +313,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | 场景 | 触发条件 | 走什么流程 |
 |------|----------|-----------|
+| 项目画像采集 | CLAUDE.md 存在初始化横幅 | `project-intake` skill |
 | 单模块需求 | 需求只涉及模块内部 | Designer → Reviewer → Builder 流程 |
 | 契约编写 | 记录模块内部决策/接口 | `contract-writing` skill |
-| 收尾自检 | 任何收尾归档前 | `python tools/audit_harness.py` |
+| 收尾自检 | 任何收尾归档前 | `python .harness/audit_harness.py` |
 
 ## 编译命令速查
 
-> TODO(项目定制)：登记本模块编译/构建命令。
+> 待 `/project-intake` 采集后登记（agent 可否执行编译验证一并标注）。
 
 ## 档案纪律
 
-**档案体系**（详见 `docs/core-beliefs.md`）：模块 `docs/design-docs/` 记录内部决策。格式：精简 ADR（Context / Decision / Consequences），命名 `NNN_<kebab-case>.md`。触发：架构调整 / 接口变更。流程：先写 md 再动代码。
+**档案体系**（详见 `.harness/docs/core-beliefs.md`）：模块 `.harness/docs/design-docs/` 记录内部决策。格式：精简 ADR（Context / Decision / Consequences），命名 `NNN_<kebab-case>.md`。触发：架构调整 / 接口变更。流程：先写 md 再动代码。
 
 ## 入口文档
 
 | 文档 | 路径 | 说明 |
 |------|------|------|
-| 核心信念 | `docs/core-beliefs.md` | 协作规则 + 档案纪律 |
-| 架构总览 | `docs/ARCHITECTURE.md` | 分层 + 数据流（需项目化更新） |
-| 标准规范 | `docs/standards/` | Harness 模板 + Mock 规范 + 自检规范 |
-| 经验库 | `docs/experience-library/` | 教训沉淀 |
-| 自检工具 | `tools/audit_harness.py` | 索引/编号/体量核对 |
+| 项目画像 | `.harness/docs/PROJECT.md` | 项目是什么/怎么跑/硬约束（intake 产物） |
+| 核心信念 | `.harness/docs/core-beliefs.md` | 协作规则 + 档案纪律 |
+| 架构总览 | `.harness/docs/ARCHITECTURE.md` | 分层 + 数据流（需项目化更新） |
+| 标准规范 | `.harness/docs/standards/` | Harness 模板 + Mock 规范 + 自检规范 |
+| 经验库 | `.harness/docs/experience-library/` | 教训沉淀 |
+| 自检工具 | `.harness/audit_harness.py` | 索引/编号/体量核对 |
 
 ## Commit 策略
 
